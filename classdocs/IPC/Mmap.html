@@ -1,0 +1,428 @@
+
+<html>
+<head>
+<title>IPC::Mmap</title>
+</head>
+<body>
+<table width='100%' border=0 CELLPADDING='0' CELLSPACING='3'>
+<TR>
+<TD VALIGN='top' align=left><FONT SIZE='-2'>
+ SUMMARY:&nbsp;<A HREF='#constructor_summary'>CONSTR</a>&nbsp;|&nbsp;<A HREF='#method_summary'>METHOD</a>
+ </FONT></TD>
+<TD VALIGN='top' align=right><FONT SIZE='-2'>
+DETAIL:&nbsp;<A HREF='#constructor_detail'>CONSTR</a>&nbsp;|&nbsp;<A HREF='#method_detail'>METHOD</a>
+</FONT></TD>
+</TR>
+</table><hr>
+<h2>Class IPC::Mmap</h2>
+
+<p>
+<dl>
+<dt><b>Known Subclasses:</b>
+<dd><a href='../IPC/Mmap/POSIX.html'>IPC::Mmap::POSIX</a></dd>
+<dd><a href='../IPC/Mmap/Win32.html'>IPC::Mmap::Win32</a></dd>
+</dt>
+</dl>
+
+<hr>
+
+Provides a minimal interface to POSIX mmap(), and its
+Win32 equivalent. Abstract base class that is used by
+the IPC::Mmap::POSIX and IPC::Mmap::Win32 implementations.
+<p>
+Permission is granted to use this software under the same terms as Perl itself.
+Refer to the <a href='http://perldoc.perl.org/perlartistic.html'>Perl Artistic License</a>
+for details.
+
+
+<p>
+
+<dl>
+
+<dt><b>Author:</b></dt>
+	<dd>D. Arnold</dd>
+
+<dt><b>Version:</b></dt>
+	<dd>0.11</dd>
+
+<dt><b>Since:</b></dt>
+	<dd>2006-05-01
+</dd>
+
+<p>
+<i>Unless otherwise noted, <code>$self
+</code> is the object instance variable.</i>
+<p>
+<table border=1 cellpadding=3 cellspacing=0 width='100%'>
+<tr bgcolor='#9800B500EB00'><th colspan=2 align=left><font size='+2'>Exported Symbols</font></th></tr>
+<tr><td align=right valign=top><code>MAP_SHARED</code></td><td align=left valign=top>permit the mmap'd area to be shared with other processes
+</td></tr>
+<tr><td align=right valign=top><code>MAP_PRIVATE</code></td><td align=left valign=top>do not permit the mmap'ed area to be shared with other processes
+</td></tr>
+<tr><td align=right valign=top><code>MAP_ANON</code></td><td align=left valign=top>do not use a backing file
+</td></tr>
+<tr><td align=right valign=top><code>MAP_ANONYMOUS</code></td><td align=left valign=top>same as MAP_ANON
+</td></tr>
+<tr><td align=right valign=top><code>MAP_FILE</code></td><td align=left valign=top>use a backing file for the memory mapped area
+</td></tr>
+<tr><td align=right valign=top><code>PROT_READ</code></td><td align=left valign=top>permit read access to the mmap'ed area
+</td></tr>
+<tr><td align=right valign=top><code>PROT_WRITE</code></td><td align=left valign=top>permit write access to the mmap'ed area
+</td></tr>
+
+</table>
+<p>
+
+<table border=1 cellpadding=3 cellspacing=0 width='100%'>
+<tr bgcolor='#9800B500EB00'><th align=left><font size='+2'>Constructor Summary</font></th></tr>
+
+<tr><td align=left valign=top>
+<code><a href='#IPC::Mmap'>new</a>($filename, $length, $protflags, $mmapflags)</code>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maps the specified number of bytes of the specified file
+into the current process's address space
+</td></tr>
+</table><p>
+
+<table border=1 cellpadding=3 cellspacing=0 width='100%'>
+<tr bgcolor='#9800B500EB00'><th align=left><font size='+2'>Method Summary</font></th></tr>
+
+<tr><td align=left valign=top>
+<code><a href='#getAddress'>getAddress</a>()</code>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get the base address to which the mmap'ed region was mapped
+</td></tr>
+
+<tr><td align=left valign=top>
+<code><a href='#getFileHandle'>getFileHandle</a>()</code>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get the filehandle for the mmap'ed file
+</td></tr>
+
+<tr><td align=left valign=top>
+<code><a href='#getFilename'>getFilename</a>()</code>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get the filename (or namespace on Win32) for the mmap'ed file
+</td></tr>
+
+<tr><td align=left valign=top>
+<code><a href='#getLength'>getLength</a>()</code>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get the length of the mmap'ed region
+
+
+</td></tr>
+
+<tr><td align=left valign=top>
+<code><a href='#lock'>lock</a>()</code>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Locks the mmap'ed region
+</td></tr>
+
+<tr><td align=left valign=top>
+<code><a href='#pack'>pack</a>($offset, $packstr, @values)</code>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Packs a list of values according to the specified pack string, and writes
+the binary result to the mmap'ed region at specified offset
+</td></tr>
+
+<tr><td align=left valign=top>
+<code><a href='#read'>read</a>($data, $offset, $length)</code>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reads data from a specific area of the mmap()'ed file
+</td></tr>
+
+<tr><td align=left valign=top>
+<code><a href='#unlock'>unlock</a>()</code>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Unlock the mmap'ed region
+</td></tr>
+
+<tr><td align=left valign=top>
+<code><a href='#unpack'>unpack</a>($offset, $length, $packstr)</code>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Read the specified number of bytes starting at the specified offset
+and unpack into Perl scalars using the specified pack() string
+</td></tr>
+
+<tr><td align=left valign=top>
+<code><a href='#write'>write</a>($data, $offset, $length)</code>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Write data to the mmap()'ed region
+</td></tr>
+</table>
+<p>
+
+<a name='constructor_detail'></a>
+<table border=1 cellpadding=3 cellspacing=0 width='100%'>
+<tr bgcolor='#9800B500EB00'>
+	<th align=left><font size='+2'>Constructor Details</font></th>
+</tr>
+</table>
+
+<a name='new'></a>
+<h3>new</h3>
+<pre>
+new($filename, $length, $protflags, $mmapflags)
+</pre><p>
+<dl>
+<dd>Maps the specified number of bytes of the specified file
+into the current process's address space. Read/write access protection
+(default is read-only), and mmap() control flags may be specified
+(default is MAP_SHARED). If no length is given, maps the file's current length.
+<p>
+The specified file will be created if needed, and openned in an
+access mode that is compatible with the specified access protection.
+If the size of the file is less than the specified length, and the access flags
+include write access, the file will be extended with NUL characters to the
+specified length.
+<p>
+<b>Note</b> that for Win32, the specified file is used as a <i>"namespace"</i>,
+rather than physical file, if an "anonymous" mmap() is requested.
+<p>
+On POSIX platforms, an anonymous, private shared memory region
+can be created <i>(to be inherited by any fork()'ed
+child processes)</i> by using a zero-length filename, and
+"private" (MAP_PRIVATE) mmap() flags.
+<p>
+On Win32 platforms, the default behavior is to create a "namespace", and use the
+Windows swap file for the backing file. However, by including MAP_FILE in the
+mmap() flags parameter, the specified file will be opened and/or created,
+and used for the backing file, rather than the system swap file.
+
+
+<p>
+<dd><dl>
+<dt><b>Parameters:</b>
+<dd><code>$filename</code> - name of file (or namespace) to be mapped
+</dd>
+<dd><code>$length</code> - optional number of bytes to be mapped
+</dd>
+<dd><code>$protflags</code> - optional read/write access flags
+</dd>
+<dd><code>$mmapflags</code> - optional mmap() control flags
+
+</dd>
+<dt><b>Returns:</b><dd>the IPC::Mmap object on success; undef on failure
+</dd>
+</dl></dd></dl><hr>
+
+<p>
+
+<a name='method_detail'></a>
+<table border=1 cellpadding=3 cellspacing=0 width='100%'>
+<tr bgcolor='#9800B500EB00'>
+	<th align=left><font size='+2'>Method Details</font></th>
+</tr></table>
+
+<a name='getAddress'></a>
+<h3>getAddress</h3>
+<pre>
+getAddress()
+</pre><p>
+<dl>
+<dd>Get the base address to which the mmap'ed region was mapped.
+
+
+<p>
+<dd><dl>
+<dt><b>Returns:</b><dd>the address of the mmap()ed region.
+</dd>
+</dl></dd></dl><hr>
+
+<a name='getFileHandle'></a>
+<h3>getFileHandle</h3>
+<pre>
+getFileHandle()
+</pre><p>
+<dl>
+<dd>Get the filehandle for the mmap'ed file. If MAP_ANON
+was specified for POSIX platforms, or MAP_FILE was <b>not</b> specified
+on Win32 platforms, returns undef.
+
+
+<p>
+<dd><dl>
+<dt><b>Returns:</b><dd>the file handle used for the mmap'ed file.
+</dd>
+</dl></dd></dl><hr>
+
+<a name='getFilename'></a>
+<h3>getFilename</h3>
+<pre>
+getFilename()
+</pre><p>
+<dl>
+<dd>Get the filename (or namespace on Win32) for the mmap'ed file.
+
+
+<p>
+<dd><dl>
+<dt><b>Returns:</b><dd>the mmap'ed filename.
+</dd>
+</dl></dd></dl><hr>
+
+<a name='getLength'></a>
+<h3>getLength</h3>
+<pre>
+getLength()
+</pre><p>
+<dl>
+<dd>Get the length of the mmap'ed region
+
+
+<p>
+<dd><dl>
+<dt><b>Returns:</b><dd>the length of the mmap()ed region.
+</dd>
+</dl></dd></dl><hr>
+
+<a name='lock'></a>
+<h3>lock</h3>
+<pre>
+lock()
+</pre><p>
+<dl>
+<dd>Locks the mmap'ed region. Pure virtual function to be implemented
+in the OS-specific implementation subclass.
+
+<p>
+<dd><dl>
+</dl></dd></dl><hr>
+
+<a name='pack'></a>
+<h3>pack</h3>
+<pre>
+pack($offset, $packstr, @values)
+</pre><p>
+<dl>
+<dd>Packs a list of values according to the specified pack string, and writes
+the binary result to the mmap'ed region at specified offset.
+If the offset plus the packed data length extends beyond the end of the
+region, only the available number of bytes will be written.
+
+
+<p>
+<dd><dl>
+<dt><b>Parameters:</b>
+<dd><code>$offset</code> - offset to write the packed data
+</dd>
+<dd><code>$packstr</code> - pack string to be applied to the data
+</dd>
+<dd><code>@values</code> - list of values to pack and write
+
+</dd>
+<dt><b>Returns:</b><dd>undef if $offset is beyond the end of the mmap'ed region; otherwise,
+the total number of bytes written
+</dd>
+</dl></dd></dl><hr>
+
+<a name='read'></a>
+<h3>read</h3>
+<pre>
+read($data, $offset, $length)
+</pre><p>
+<dl>
+<dd>Reads data from a specific area of the mmap()'ed file.
+
+
+<p>
+<dd><dl>
+<dt><b>Parameters:</b>
+<dd><code>$data</code> - scalar to receive the data
+</dd>
+<dd><code>$offset</code> - optional offset into mmap'ed area; default is zero
+</dd>
+<dd><code>$length</code> - optional length to read; default is from the offset to the end of the file
+
+</dd>
+<dt><b>Returns:</b><dd>the number of bytes actually read on success; undef on failure
+</dd>
+</dl></dd></dl><hr>
+
+<a name='unlock'></a>
+<h3>unlock</h3>
+<pre>
+unlock()
+</pre><p>
+<dl>
+<dd>Unlock the mmap'ed region. Pure virtual function
+to be implemented in the OS-specific implementation
+subclass.
+
+
+<p>
+<dd><dl>
+</dl></dd></dl><hr>
+
+<a name='unpack'></a>
+<h3>unpack</h3>
+<pre>
+unpack($offset, $length, $packstr)
+</pre><p>
+<dl>
+<dd>Read the specified number of bytes starting at the specified offset
+and unpack into Perl scalars using the specified pack() string.
+
+
+<p>
+<dd><dl>
+<dt><b>Parameters:</b>
+<dd><code>$offset</code> - offset to start reading from
+</dd>
+<dd><code>$length</code> - number of bytes to read
+</dd>
+<dd><code>$packstr</code> - pack string to apply to the read data
+
+</dd>
+<dt><b>Returns:</b><dd>on success, the list of unpacked values; undef on failure
+</dd>
+</dl></dd></dl><hr>
+
+<a name='write'></a>
+<h3>write</h3>
+<pre>
+write($data, $offset, $length)
+</pre><p>
+<dl>
+<dd>Write data to the mmap()'ed region.
+Writes the specified number of bytes of the specified scalar variable
+to the mmap'ed region starting at the specified offset. If not specified,
+offset defaults to zero, and length> defaults to the length of the scalar.
+If the specified length exceeds the available length of the mmap'ed region
+starting from the offset, only the available region length will be written.
+
+
+<p>
+<dd><dl>
+<dt><b>Parameters:</b>
+<dd><code>$data</code> - the data to be written
+</dd>
+<dd><code>$offset</code> - optional offset where the data should be written; default is zero
+</dd>
+<dd><code>$length</code> - optional length of the data to write; default is the length of the data
+
+</dd>
+<dt><b>Returns:</b><dd>on success, returns the actual number of bytes written; returns undef
+if the offset exceeds the length of the region
+</dd>
+</dl></dd></dl><hr>
+
+<small>
+<center>
+<i>Generated by psichedoc on Wed May  3 07:40:42 2006</i>
+</center>
+</small>
+</body>
+</html>
