@@ -30,8 +30,8 @@ END {print "not ok 1\n" unless $loaded;}
 #	13. Repeat all using processes: tricky for windows...
 #	14. Repeat all using threads in processes
 #
-use threads;
-use threads::shared;
+#use threads;
+#use threads::shared;
 use Time::HiRes qw(time);
 use IPC::Mmap;
 use FileHandle;
@@ -40,7 +40,7 @@ use strict;
 use warnings;
 
 our $testtype = 'basic filename, single thread, single process';
-my $testno : shared = 1;
+my $testno = 1;
 
 sub report_result {
 	my ($result, $testmsg, $okmsg, $notokmsg) = @_;

@@ -1,4 +1,9 @@
+Vers. 0.12	2006-Aug-14		D. Arnold
+
+	- removed threads dependencies in test suite
+
 Vers. 0.11	2006-Apr-23		D. Arnold
+
 	- added getAddress() method
 	- cleaned up XS code
 	- merged POSIX.xs into Mmap.xs

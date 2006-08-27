@@ -1,6 +1,7 @@
 #
 #	IPC::Mmap test script
 #
+use Config;
 use vars qw($tests $loaded);
 BEGIN {
 	push @INC, './t';
@@ -9,11 +10,15 @@ BEGIN {
 	$^W= 1;
 	$| = 1;
 	print "1..$tests\n";
+	unless ($Config{usethreads} && (!$ENV{DEVEL_RINGBUF_NOTHREADS})) {
+		print "ok $_ # skip your Perl is not configured for threads\n"
+			foreach (1..$tests);
+		exit;
+	}
 }
 
 END {print "not ok 1\n" unless $loaded;}
 
-use Config;
 use threads;
 use threads::shared;
 use Time::HiRes qw(time);
@@ -87,9 +92,9 @@ $reader->join();
 
 sub read_mmap {
 	my $value;
-	my $result; 
+	my $result;
 #
-#	wait forwriter 
+#	wait forwriter
 #
 	{
 		lock($thrdlock);
@@ -134,7 +139,7 @@ sub read_mmap {
 sub write_mmap {
 	my $result;
 #
-#	wait for parent to release 
+#	wait for parent to release
 #
 	{
 		lock($thrdlock);

@@ -67,7 +67,7 @@ unless (defined($mmap)) {
 	exit 1;
 }
 
-my $thrdlock : shared = 0;	# to coordinate threads
+#my $thrdlock : shared = 0;	# to coordinate threads
 #
 #	create 2 threads; 1st writes, 2nd reads
 #	lock the mmap first to control sequencing
