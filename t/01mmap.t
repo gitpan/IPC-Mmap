@@ -88,8 +88,8 @@ report_result(defined($mmap), 'create from filename');
 unless (defined($mmap)) {
 #	skip the rest
 	report_result('skip', 'no mmap, skipping')
-		while ($testno < $tests);
-	exit 1;
+		while ($testno <= $tests);
+	exit 0;
 }
 #
 #	test accessors
@@ -200,8 +200,8 @@ report_result(defined($mmap), 'create with backing file');
 unless (defined($mmap)) {
 #	skip the rest
 	report_result('skip', 'no mmap, skipping')
-		while ($testno < $tests);
-	exit 1;
+		while ($testno <= $tests);
+	exit 0;
 }
 #
 #	lock it
@@ -273,6 +273,13 @@ report_result(1, 'unmap');
 #
 unlink('ipc_mmap.tmp');
 
+if (($^O eq 'darwin') || ($^O=~/bsd/)) {
+#	skip the rest
+	report_result('skip', "write-only mmap not supported on $^O")
+		while ($testno <= $tests);
+	exit 0;
+}
+else
 {
 #
 #	write-only test
@@ -285,8 +292,8 @@ report_result(defined($mmap), 'create from filename');
 unless (defined($mmap)) {
 #	skip the rest
 	report_result('skip', 'no mmap, skipping')
-		while ($testno < $tests);
-	exit 1;
+		while ($testno <= $tests);
+	exit 0;
 }
 #
 #	lock it

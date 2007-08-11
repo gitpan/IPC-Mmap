@@ -1,3 +1,8 @@
+Vers. 0.13	2007-Aug-11		D. Arnold
+
+	- disable write-only tests for OS X aka 'darwin' and other
+		BSD derivatives
+
 Vers. 0.12	2006-Aug-14		D. Arnold
 
 	- removed threads dependencies in test suite

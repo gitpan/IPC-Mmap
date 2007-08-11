@@ -24,7 +24,7 @@ use Carp;
 use DynaLoader;
 use Exporter;
 our @ISA = qw(Exporter DynaLoader);
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 bootstrap IPC::Mmap $VERSION;
 
