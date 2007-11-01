@@ -1,3 +1,6 @@
+Vers. 0.14	2007-Oct-31		A. Douitsis
+	- Changes involving mmap with MAP_ANON on POSIX
+
 Vers. 0.13	2007-Aug-11		D. Arnold
 
 	- disable write-only tests for OS X aka 'darwin' and other

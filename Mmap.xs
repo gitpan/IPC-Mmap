@@ -14,6 +14,7 @@ extern "C" {
 }
 #endif
 
+#ifdef NEED_NOT_HERE
 static int
 not_here(s)
 char *s;
@@ -21,6 +22,7 @@ char *s;
     croak("%s not implemented on this architecture", s);
     return -1;
 }
+#endif
 
 #ifdef WIN32
 
@@ -77,61 +79,69 @@ int arg;
     errno = 0;
     switch (*name) {
 		case 'M':
-			if (strEQ(name, "MAP_ANON"))
+			if (strEQ(name, "MAP_ANON")) {
 #ifdef MAP_ANON
 				return MAP_ANON;
 #else
-				goto not_there;
+			    errno = ENOENT;
+			    return 0;
 #endif
-			if (strEQ(name, "MAP_ANONYMOUS"))
+			}
+			if (strEQ(name, "MAP_ANONYMOUS")) {
 #ifdef MAP_ANONYMOUS
 				return MAP_ANONYMOUS;
 #else
-				goto not_there;
+			    errno = ENOENT;
+			    return 0;
 #endif
-			if (strEQ(name, "MAP_FILE"))
+			}
+			if (strEQ(name, "MAP_FILE")) {
 #ifdef MAP_FILE
 				return MAP_FILE;
 #else
-				goto not_there;
+			    errno = ENOENT;
+			    return 0;
 #endif
-			if (strEQ(name, "MAP_PRIVATE"))
+			}
+			if (strEQ(name, "MAP_PRIVATE")) {
 #ifdef MAP_PRIVATE
 				return MAP_PRIVATE;
 #else
-				goto not_there;
+			    errno = ENOENT;
+			    return 0;
 #endif
-			if (strEQ(name, "MAP_SHARED"))
+			}
+			if (strEQ(name, "MAP_SHARED")) {
 #ifdef MAP_SHARED
 				return MAP_SHARED;
 #else
-				goto not_there;
+			    errno = ENOENT;
+			    return 0;
 #endif
-			break;
+			}
 
 		case 'P':
-			if (strEQ(name, "PROT_READ"))
+			if (strEQ(name, "PROT_READ")) {
 #ifdef PROT_READ
 				return PROT_READ;
 #else
-				goto not_there;
+			    errno = ENOENT;
+			    return 0;
 #endif
-			if (strEQ(name, "PROT_WRITE"))
+			}
+			if (strEQ(name, "PROT_WRITE")) {
 #ifdef PROT_WRITE
 				return PROT_WRITE;
 #else
-				goto not_there;
+			    errno = ENOENT;
+			    return 0;
 #endif
-			break;
+			}
 
 		default:
 			break;
 	}
     errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
     return 0;
 }
 
@@ -195,7 +205,7 @@ mmap_write(addr, maxlen, off, var, len)
 #			lcladdr, maxlen, off, len);
 
 		ptr = SvPV(var, varlen);
-		if (len > varlen)
+		if (len > (int)varlen)
 			len = varlen;
 		if (len > (maxlen - off))
 			len = maxlen - off;
@@ -217,6 +227,57 @@ double
 constant(name,arg)
 	char *		name
 	int		arg
+
+void
+_mmap_anon(len, prot, flags)
+	size_t        len
+	int           prot
+	int           flags
+    PROTOTYPE: $$$
+    PPCODE:
+		int   fd;
+		void *  addr;
+		int   slop;
+/*		struct stat st; */
+
+#		printf("\n_mmap: len %i prot %i flags %i\n", len, prot, flags);
+ 		EXTEND(SP, 3);
+		fd = -1;
+		if (!len)  {
+			croak("mmap: MAP_ANON specified, but no length specified. cannot infer length from file");
+			PUSHs(&PL_sv_undef);
+			PUSHs(&PL_sv_undef);
+			PUSHs(&PL_sv_undef);
+			XSRETURN(3);
+		}
+
+		if (pagesize == 0) {
+			pagesize = getpagesize();
+		}
+
+#		slop = off % pagesize;
+		slop = 0;
+
+#		addr = mmap(0, len + slop, prot, flags, fd, off - slop);
+		addr = mmap(0, len + slop, prot, flags, fd, 0);
+
+#		printf("\n_mmap: fileno %i slop %i addr %u\n", fd, slop, addr);
+
+		if (addr == NULL) {
+			croak("mmap: mmap call failed: errno: %d errmsg: %s ", errno, strerror(errno));
+		 	PUSHs(&PL_sv_undef);
+		 	PUSHs(&PL_sv_undef);
+		 	PUSHs(&PL_sv_undef);
+			XSRETURN(3);
+		}
+#
+# return the address, the length (incl slop),
+# and the offset (adjusted to nearest page)
+#
+	 	PUSHs(sv_2mortal(newSVuv(PTR2UV(addr))));
+	 	PUSHs(sv_2mortal(newSVnv((int) len + slop)));
+	 	PUSHs(sv_2mortal(newSVnv((int) slop)));
+		XSRETURN(3);
 
 void
 _mmap(len, prot, flags, fh)

@@ -17,6 +17,8 @@ package IPC::Mmap::POSIX;
 use Carp;
 use Fcntl qw(:flock :mode);
 use FileHandle;
+use IPC::SysV qw(IPC_PRIVATE IPC_CREAT);
+use IPC::Semaphore;
 use IPC::Mmap;
 use IPC::Mmap qw(MAP_ANON MAP_ANONYMOUS MAP_FILE MAP_PRIVATE MAP_SHARED
 	PROT_READ PROT_WRITE);
@@ -24,6 +26,7 @@ use base qw(IPC::Mmap);
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 #use constant MAP_ANON => constant('MAP_ANON', 0);
 #use constant MAP_ANONYMOUS => constant('MAP_ANONYMOUS', 0);
@@ -47,7 +50,35 @@ our $VERSION = '0.11';
 sub new {
 	my ($class, $file, $length, $prot, $mmap) = @_;
 
+	#create a brand new semaphore 
+	my $sem = new IPC::Semaphore(IPC_PRIVATE, 1, 0666|IPC_CREAT) or croak "Cannot create semaphore";
+	#make sure its released
+	$sem->op(0,1,0) or croak "Cannot op(0,1,0) on sem";
+	#@@#warn "semaphore value is ",$sem->getval(0),"\n";
+
 	my $fh;
+
+	#the MAN_ANON case will be handled independentlY
+	if($mmap & MAP_ANON) {
+		###warn "anonymous mmap engaged";
+
+		my ($mapaddr, $maxlen, $slop) = _mmap_anon($length, $prot, $mmap);
+		croak "mmap() failed" unless defined($mapaddr);
+		my $self = {
+			_fh => $fh,
+			_file => $file,
+			_mmap => $mmap,
+			_access => $prot,
+			_addr => $mapaddr,
+			_maxlen => $maxlen,
+			_slop => $slop,
+			use_semaphore => 1,
+			semaphore => $sem,
+		};
+
+	return bless $self, $class;
+	}
+
 
 	croak 'No filename or filehandle provided.'
 		unless defined($file) || ($mmap & MAP_ANON);
@@ -119,6 +150,13 @@ sub new {
 sub lock {
 	my ($self, $offset, $len) = @_;
 
+	if($self->{use_semaphore}) {
+		#acquire
+		$self->{semaphore}->op(0,-1,0) or croak("Cannot op(0,-1,0) on sem");
+		#@@#warn "semaphore acquired";
+		return 1;
+	}
+			
 	my $fh = $self->{_fh};
 	my $mode = ($self->{_access} & PROT_READ) ? LOCK_SH : LOCK_EX;
 	return flock($fh, $mode);
@@ -130,6 +168,13 @@ sub lock {
 #*/
 sub unlock {
 	my ($self, $offset, $len) = @_;
+
+	if($self->{use_semaphore}) {
+		#release
+		$self->{semaphore}->op(0,1,0) or croak("Cannot op(0,1,0) on sem");
+		#@@#warn "semaphore released";
+		return 1;
+	}
 
 	my $fh = $self->{_fh};
 	return flock($fh, LOCK_UN);
