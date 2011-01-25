@@ -9,6 +9,8 @@
 # @author D. Arnold
 # @since 2006-05-01
 # @self $self
+#
+# maintenance and modifications - Athanasios Douitsis aduitsis@cpan.org
 #*/
 package IPC::Mmap::POSIX;
 #
@@ -20,6 +22,7 @@ use FileHandle;
 use IPC::SysV qw(IPC_PRIVATE IPC_CREAT);
 use IPC::Semaphore;
 use IPC::Mmap;
+use FindBin qw($Bin $Script);
 use IPC::Mmap qw(MAP_ANON MAP_ANONYMOUS MAP_FILE MAP_PRIVATE MAP_SHARED
 	PROT_READ PROT_WRITE);
 use base qw(IPC::Mmap);
@@ -36,7 +39,7 @@ use Data::Dumper;
 #use constant PROT_READ  => constant('PROT_READ', 0);
 #use constant PROT_WRITE => constant('PROT_WRITE', 0);
 
-our $VERSION = '0.11';
+our $VERSION = '0.2';
 #/**
 # Constructor. mmap()'s using POSIX mmap().
 #
@@ -50,17 +53,31 @@ our $VERSION = '0.11';
 sub new {
 	my ($class, $file, $length, $prot, $mmap) = @_;
 
-	#create a brand new semaphore 
-	my $sem = new IPC::Semaphore(IPC_PRIVATE, 1, 0666|IPC_CREAT) or croak "Cannot create semaphore";
-	#make sure its released
-	$sem->op(0,1,0) or croak "Cannot op(0,1,0) on sem";
-	#@@#warn "semaphore value is ",$sem->getval(0),"\n";
-
 	my $fh;
 
 	#the MAN_ANON case will be handled independentlY
 	if($mmap & MAP_ANON) {
-		###warn "anonymous mmap engaged";
+		#make sure we weren't given something that is not a pathname
+		croak 'When using anonymous mmap, only a pathname is allowed as the first argument' unless (ref($file) eq '');
+
+		#if the file doesn't exist, just touch it
+		if(! -e $file) {
+			open(my $fd,'>',$file) or croak $!;
+			close $fd;
+		}
+		if(! -r $file) {
+			croak "For anonymous mmap, you must provide an readable filename in order for the ftok(3) to return a valid unique id. Unfortunately $file doesn't seem to be readable. ";
+		}
+
+		my $unique_id = IPC::SysV::ftok($file);
+		
+		#create a brand new semaphore 
+		my $sem = new IPC::Semaphore($unique_id, 1, 0666|IPC_CREAT) or croak "Cannot create semaphore:$!";
+		####print STDERR "semaphore is ".Dumper($sem)." \n";
+
+		#make sure its released
+		$sem->op(0,1,0) or croak "Cannot op(0,1,0) on sem";
+		#@@#warn "semaphore value is ",$sem->getval(0),"\n";
 
 		my ($mapaddr, $maxlen, $slop) = _mmap_anon($length, $prot, $mmap);
 		croak "mmap() failed" unless defined($mapaddr);
@@ -72,7 +89,6 @@ sub new {
 			_addr => $mapaddr,
 			_maxlen => $maxlen,
 			_slop => $slop,
-			use_semaphore => 1,
 			semaphore => $sem,
 		};
 
@@ -134,6 +150,13 @@ sub new {
 	return bless $self, $class;
 }
 
+sub DESTROY {
+	if(defined($_[0]->{semaphore})) {
+		print STDERR "destroying semaphore ".Dumper($_[0]->{semaphore})."\n";
+		$_[0]->{semaphore}->remove;
+	}
+}
+
 #/**
 # Locks the mmap'ed region. Implemented using flock()
 # on the mmap()'ed file.
@@ -150,7 +173,7 @@ sub new {
 sub lock {
 	my ($self, $offset, $len) = @_;
 
-	if($self->{use_semaphore}) {
+	if(defined($self->{semaphore})) {
 		#acquire
 		$self->{semaphore}->op(0,-1,0) or croak("Cannot op(0,-1,0) on sem");
 		#@@#warn "semaphore acquired";
@@ -158,8 +181,8 @@ sub lock {
 	}
 			
 	my $fh = $self->{_fh};
-	my $mode = ($self->{_access} & PROT_READ) ? LOCK_SH : LOCK_EX;
-	return flock($fh, $mode);
+	my $mmode = ($self->{_access} == PROT_READ) ? LOCK_SH : LOCK_EX;
+	return flock($fh, $mmode);
 }
 
 #/**
@@ -169,7 +192,7 @@ sub lock {
 sub unlock {
 	my ($self, $offset, $len) = @_;
 
-	if($self->{use_semaphore}) {
+	if(defined($self->{semaphore})) {
 		#release
 		$self->{semaphore}->op(0,1,0) or croak("Cannot op(0,1,0) on sem");
 		#@@#warn "semaphore released";

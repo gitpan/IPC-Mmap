@@ -21,7 +21,7 @@ END {print "not ok 1\n" unless $loaded;}
 
 #use threads;
 #use threads::shared;
-use Time::HiRes qw(time);
+use Time::HiRes qw(time usleep);
 use IPC::Mmap;
 
 use strict;
@@ -53,11 +53,16 @@ $loaded = 1;
 #	create w/ filename, but wo/ a backing file
 #	(works for both Win32 and POSIX)
 #
-my $mmap = ($^O eq 'MAWin32') ?
-	IPC::Mmap->new('test2_mmap.tmp', 10000,
-		PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANON) :
-	IPC::Mmap->new('test2_mmap.tmp', 10000,
-		PROT_READ|PROT_WRITE, MAP_SHARED|MAP_FILE);
+sub create_mmap {
+	my $mmap = ($^O eq 'MAWin32') ?
+		IPC::Mmap->new('test2_mmap.tmp', 10000,
+			PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANON) :
+		IPC::Mmap->new('test2_mmap.tmp', 10000,
+			PROT_READ|PROT_WRITE, MAP_SHARED|MAP_FILE);
+	return $mmap;
+}
+
+my $mmap = create_mmap;
 report_result(defined($mmap), 'create from filename');
 
 unless (defined($mmap)) {
@@ -84,6 +89,10 @@ unless ($writer) {
 
 $mmap->unlock();
 
+#race condition - will the writer be always faster than the reader?
+#let's give it a little time, say 10milliseconds
+usleep(10000);
+
 my $reader = fork();
 
 die "Can't fork reader" unless defined($reader);
@@ -97,6 +106,7 @@ waitpid($writer, 0);
 waitpid($reader, 0);
 
 sub read_mmap {
+	my $mmap = create_mmap;
 	$mmap->lock();
 	my $value;
 	my $result = $mmap->read($value, 100, 2000);
@@ -125,6 +135,7 @@ sub write_mmap {
 #
 #	no result report here, else Test harness will get confused
 #
+	my $mmap = create_mmap;
 	my $result = $mmap->lock();
 	$result = $mmap->write('K' x 2000, 100);
 	$result = $mmap->unlock();

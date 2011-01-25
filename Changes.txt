@@ -1,3 +1,7 @@
+Vers. 0.20	2011-Jan-19		A. Douitsis
+	- Fixed 03multiproc.t. When forking, inherited flock was the same for all child and parent. Re-opening file after fork  fixes that bug.
+	- Fixed semaphore exhaustion after several tests. Removed IPC_PRIVATE, now using ftok and a (real,readable) file to generate unique semid
+
 Vers. 0.14	2007-Oct-31		A. Douitsis
 	- Changes involving mmap with MAP_ANON on POSIX
 
