@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               IPC-Mmap
-version:            0.20
+version:            0.21
 abstract:           minimal unified mmap for POSIX and Win32
 author:
     - Dean Arnold, Presicient Corp. (darnold@presicient.com)
